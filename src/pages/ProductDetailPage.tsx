@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useCartStore } from "@/lib/store";
-import { products } from "@/lib/data";
+import { products, categories } from "@/lib/data";
 import { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
