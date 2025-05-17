@@ -18,6 +18,8 @@ import AboutPage from "./pages/AboutPage";
 import AdminPage from "./pages/AdminPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -32,16 +34,27 @@ const App = () => (
             <Navbar />
             <main className="flex-1">
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/about" element={<AboutPage />} />
-                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                
+                {/* Protected Routes - Require login */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+                </Route>
+                
+                {/* Admin Routes - Require admin role */}
+                <Route element={<AdminRoute />}>
+                  <Route path="/admin" element={<AdminPage />} />
+                </Route>
+                
+                {/* 404 Page */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

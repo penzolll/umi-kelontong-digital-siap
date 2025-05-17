@@ -1,10 +1,10 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Eye, EyeOff, Apple, LogIn, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Apple, LogIn, UserPlus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Login form schema with validation
 const loginSchema = z.object({
@@ -38,13 +39,33 @@ const registerSchema = z.object({
 // Define API URL base - change this to your actual backend URL
 const API_BASE_URL = "https://api.umistore.com"; // Change this to your actual backend URL
 
+// Hardcoded admin account for demo
+const ADMIN_CREDENTIALS = {
+  email: "matdew444@outlook.com",
+  password: "123098"
+};
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const { login, isLoggedIn, isAdmin } = useAuth();
+
+  // Get the redirect path from location state
+  const from = location.state?.from?.pathname || "/";
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      // Redirect admin to admin page, regular users to previous location or home
+      const redirectPath = isAdmin ? "/admin" : from;
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isLoggedIn, isAdmin, navigate, from]);
 
   // Initialize login form
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -69,8 +90,33 @@ export default function AuthPage() {
   // Handle login form submission
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
+    setLoginError("");
     
     try {
+      // For demo purposes, check for admin credentials
+      if (values.email === ADMIN_CREDENTIALS.email && 
+          values.password === ADMIN_CREDENTIALS.password) {
+        
+        // Create mock admin login response
+        const mockAdminResponse = {
+          token: "admin-demo-token",
+          user: {
+            id: "admin-1",
+            name: "Admin User",
+            email: ADMIN_CREDENTIALS.email,
+            role: "admin"
+          }
+        };
+        
+        // Use the login function from AuthContext
+        login(mockAdminResponse.token, mockAdminResponse.user);
+        
+        toast.success("Login berhasil sebagai Admin");
+        navigate("/admin"); // Redirect to admin page
+        return;
+      }
+    
+      // For regular users, make API request (in a real implementation)
       // Replace with your API endpoint
       const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: "POST",
@@ -90,10 +136,10 @@ export default function AuthPage() {
       login(data.token, data.user);
       
       toast.success("Login berhasil");
-      navigate("/"); // Redirect to homepage
+      navigate(from); // Redirect to previous page or homepage
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error instanceof Error ? error.message : "Login gagal");
+      setLoginError(error instanceof Error ? error.message : "Email atau password salah");
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +200,7 @@ export default function AuthPage() {
       login(data.token, data.user);
       
       toast.success(`Login dengan ${provider} berhasil`);
-      navigate("/"); // Redirect to homepage
+      navigate(from); // Redirect to previous page or homepage
     } catch (error) {
       console.error(`${provider} login error:`, error);
       toast.error(error instanceof Error ? error.message : `Login dengan ${provider} gagal`);
@@ -239,6 +285,14 @@ export default function AuthPage() {
             </span>
           </div>
         </div>
+
+        {/* Display login error if any */}
+        {loginError && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{loginError}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Login Form */}
         {isLogin ? (
