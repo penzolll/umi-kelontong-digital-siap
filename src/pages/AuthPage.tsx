@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { User } from "@/lib/types";
 
 // Login form schema with validation
 const loginSchema = z.object({
@@ -97,14 +97,14 @@ export default function AuthPage() {
       if (values.email === ADMIN_CREDENTIALS.email && 
           values.password === ADMIN_CREDENTIALS.password) {
         
-        // Create mock admin login response
+        // Create mock admin login response with properly typed role
         const mockAdminResponse = {
           token: "admin-demo-token",
           user: {
             id: "admin-1",
             name: "Admin User",
             email: ADMIN_CREDENTIALS.email,
-            role: "admin"
+            role: "admin" as const // Use const assertion to ensure TypeScript treats this as "admin" literal type
           }
         };
         
