@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ShoppingCart, Package, AlertCircle } from "lucide-react";
@@ -17,30 +16,54 @@ import { products, categories } from "@/lib/data";
 import { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
+import { getProductDetails, IS_DEMO_MODE } from "@/lib/api";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const { addItem } = useCartStore();
 
   useEffect(() => {
-    // Find product by ID
-    const foundProduct = products.find(p => p.id === id);
-    
-    if (foundProduct) {
-      setProduct(foundProduct);
+    const fetchProductDetails = async () => {
+      setLoading(true);
+      setError(null);
       
-      // Find related products (same category)
-      const related = products
-        .filter(p => p.category === foundProduct.category && p.id !== id)
-        .slice(0, 4);
-      setRelatedProducts(related);
-    }
+      try {
+        if (IS_DEMO_MODE) {
+          // For demo: use static data
+          const foundProduct = products.find(p => p.id === id);
+          
+          if (!foundProduct) {
+            setError("Produk tidak ditemukan");
+            return;
+          }
+          
+          setProduct(foundProduct);
+          
+          // Find related products (same category)
+          const related = products
+            .filter(p => p.category === foundProduct.category && p.id !== id)
+            .slice(0, 4);
+          setRelatedProducts(related);
+        } else {
+          // For production: use API
+          const data = await getProductDetails(id || '');
+          setProduct(data.product);
+          setRelatedProducts(data.relatedProducts || []);
+        }
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setError("Gagal memuat produk");
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    setLoading(false);
+    fetchProductDetails();
   }, [id]);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,13 +102,13 @@ export default function ProductDetailPage() {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="container py-12 text-center">
         <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
         <h1 className="text-2xl font-bold mb-4">Produk tidak ditemukan</h1>
         <p className="mb-8 text-muted-foreground">
-          Produk yang Anda cari tidak tersedia atau telah dihapus.
+          {error || "Produk yang Anda cari tidak tersedia atau telah dihapus."}
         </p>
         <Link to="/products">
           <Button>Kembali ke Daftar Produk</Button>
