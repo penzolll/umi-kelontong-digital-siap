@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Eye, EyeOff, Apple, Google, LogIn, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Apple, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -210,7 +210,10 @@ export default function AuthPage() {
             onClick={() => handleSocialLogin("google")}
             className="h-12"
           >
-            <Google className="mr-2 h-5 w-5" />
+            <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8M12 8v8"></path>
+            </svg>
             Lanjutkan dengan Google
           </Button>
 
