@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ShoppingCart, Package, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,9 @@ import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
 import { getProductDetails, IS_DEMO_MODE } from "@/lib/api";
 
+// Lazy load the related products component
+const RelatedProducts = lazy(() => import("@/components/RelatedProducts"));
+
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -27,6 +31,25 @@ export default function ProductDetailPage() {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const { addItem } = useCartStore();
 
+  // Prefetch product data
+  useEffect(() => {
+    // Add page metadata for SEO
+    document.title = product ? `${product.name} | UMI Store` : "Product Detail | UMI Store";
+    
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription && product) {
+      metaDescription.setAttribute('content', product.description?.substring(0, 160) || 'Detail produk UMI Store');
+    }
+    
+    // Clean up function
+    return () => {
+      document.title = "UMI Store - Toko Kelontong Online";
+      if (metaDescription) {
+        metaDescription.setAttribute('content', 'UMI Store - Toko kelontong online terlengkap dengan pengiriman cepat');
+      }
+    };
+  }, [product]);
+
   useEffect(() => {
     const fetchProductDetails = async () => {
       setLoading(true);
@@ -34,7 +57,9 @@ export default function ProductDetailPage() {
       
       try {
         if (IS_DEMO_MODE) {
-          // For demo: use static data
+          // For demo: use static data but with a slight delay to simulate network
+          const fetchStart = performance.now();
+          
           const foundProduct = products.find(p => p.id === id);
           
           if (!foundProduct) {
@@ -49,11 +74,15 @@ export default function ProductDetailPage() {
             .filter(p => p.category === foundProduct.category && p.id !== id)
             .slice(0, 4);
           setRelatedProducts(related);
+          
+          console.log(`Demo product fetch took ${performance.now() - fetchStart}ms`);
         } else {
-          // For production: use API
+          // For production: use API with performance measurement
+          const fetchStart = performance.now();
           const data = await getProductDetails(id || '');
           setProduct(data.product);
           setRelatedProducts(data.relatedProducts || []);
+          console.log(`API product fetch took ${performance.now() - fetchStart}ms`);
         }
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -97,7 +126,21 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="container py-12 flex justify-center">
-        <div className="animate-pulse">Memuat...</div>
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="bg-gray-200 rounded-lg h-80"></div>
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -126,12 +169,15 @@ export default function ProductDetailPage() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 mb-12">
-        {/* Product Image */}
+        {/* Product Image with loading optimization */}
         <div className="bg-white rounded-lg border overflow-hidden flex items-center justify-center p-4">
           <img
             src={product.image}
             alt={product.name}
             className="object-contain max-h-[400px] w-full"
+            loading="eager"
+            width="600"
+            height="600"
           />
         </div>
 
@@ -207,39 +253,11 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Related Products */}
+      {/* Related Products - Lazy loaded */}
       {relatedProducts.length > 0 && (
-        <div>
-          <h2 className="text-xl font-bold mb-4">Produk Terkait</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {relatedProducts.map((relatedProduct) => (
-              <Card key={relatedProduct.id}>
-                <CardHeader className="p-4">
-                  <div className="h-32 flex items-center justify-center">
-                    <img
-                      src={relatedProduct.image}
-                      alt={relatedProduct.name}
-                      className="max-h-full object-contain"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <CardTitle className="text-sm line-clamp-2">{relatedProduct.name}</CardTitle>
-                  <CardDescription className="mt-2 font-bold">
-                    {formatCurrency(relatedProduct.discountPrice || relatedProduct.price)}
-                  </CardDescription>
-                </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Link to={`/product/${relatedProduct.id}`} className="w-full">
-                    <Button variant="outline" size="sm" className="w-full">
-                      Lihat Detail
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <Suspense fallback={<div className="animate-pulse h-48 bg-gray-100 rounded-lg"></div>}>
+          <RelatedProducts products={relatedProducts} />
+        </Suspense>
       )}
     </div>
   );

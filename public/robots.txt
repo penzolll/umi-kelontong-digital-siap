@@ -1,8 +1,20 @@
+
+# Robots.txt for UMI Store
+# Allow all bots to index the site
+User-agent: *
+Allow: /
+
+# Sitemap location (for future implementation)
+Sitemap: https://umistore.com/sitemap.xml
+
+# Optimize for specific crawlers
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +22,7 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Disallow certain admin paths
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /api/

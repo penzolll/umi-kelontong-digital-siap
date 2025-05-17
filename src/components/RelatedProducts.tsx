@@ -1,0 +1,56 @@
+
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Product } from "@/lib/types";
+import { formatCurrency } from "@/lib/utils";
+
+interface RelatedProductsProps {
+  products: Product[];
+}
+
+export default function RelatedProducts({ products }: RelatedProductsProps) {
+  return (
+    <div>
+      <h2 className="text-xl font-bold mb-4">Produk Terkait</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {products.map((product) => (
+          <Card key={product.id}>
+            <CardHeader className="p-4">
+              <div className="h-32 flex items-center justify-center">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="max-h-full object-contain"
+                  loading="lazy"
+                  width="200"
+                  height="200"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <CardTitle className="text-sm line-clamp-2">{product.name}</CardTitle>
+              <CardDescription className="mt-2 font-bold">
+                {formatCurrency(product.discountPrice || product.price)}
+              </CardDescription>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Link to={`/product/${product.id}`} className="w-full">
+                <Button variant="outline" size="sm" className="w-full">
+                  Lihat Detail
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
