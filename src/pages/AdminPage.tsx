@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Trash2, Edit, Eye, Package, ShoppingCart } from "lucide-react";
+import { Plus, Trash2, Edit, Eye, Package, ShoppingCart, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +16,8 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   // Initialize data
   useEffect(() => {
@@ -70,12 +72,14 @@ export default function AdminPage() {
     });
     
     setIsEditing(true);
+    setPreviewImage(null);
   };
   
   // Handle edit product
   const handleEditProduct = (product: Product) => {
     setCurrentProduct({ ...product });
     setIsEditing(true);
+    setPreviewImage(product.image);
   };
   
   // Handle save product
@@ -93,10 +97,16 @@ export default function AdminPage() {
       return;
     }
     
+    // Use the preview image if available
+    const productToSave = {
+      ...currentProduct,
+      image: previewImage || currentProduct.image
+    };
+    
     if (currentProduct.id) {
       // Update existing product
       setProductsList(prev => 
-        prev.map(p => p.id === currentProduct.id ? currentProduct : p)
+        prev.map(p => p.id === currentProduct.id ? productToSave : p)
       );
       
       toast({
@@ -106,7 +116,7 @@ export default function AdminPage() {
     } else {
       // Add new product
       const newProduct = {
-        ...currentProduct,
+        ...productToSave,
         id: generateId(),
       };
       
@@ -120,6 +130,7 @@ export default function AdminPage() {
     
     setIsEditing(false);
     setCurrentProduct(null);
+    setPreviewImage(null);
   };
   
   // Handle delete product
@@ -145,6 +156,46 @@ export default function AdminPage() {
       title: "Status Pesanan Diperbarui",
       description: `Pesanan ${orderId} sekarang "${status}"`
     });
+  };
+
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Ukuran gambar maksimal 2MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check file type
+    if (!file.type.match('image.*')) {
+      toast({
+        title: "Error",
+        description: "File harus berupa gambar",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create object URL for preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewImage(objectUrl);
+    
+    // In a real app with backend, you would upload the file to a server here
+    // and get back the URL to store in the product
+  };
+  
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -270,6 +321,46 @@ export default function AdminPage() {
                       <label htmlFor="promo" className="ml-2 text-sm">Produk Promo</label>
                     </div>
                   </div>
+
+                  {/* Image upload section */}
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-sm font-medium mb-1">Gambar Produk</label>
+                    <div className="mt-1 flex items-center space-x-4">
+                      <div className="w-24 h-24 border rounded-md overflow-hidden bg-muted/30 flex items-center justify-center relative">
+                        {previewImage ? (
+                          <>
+                            <img 
+                              src={previewImage} 
+                              alt="Preview" 
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleRemoveImage}
+                              className="absolute top-1 right-1 bg-black/50 rounded-full p-1 hover:bg-black/70"
+                              title="Hapus gambar"
+                            >
+                              <X className="h-3 w-3 text-white" />
+                            </button>
+                          </>
+                        ) : (
+                          <Upload className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <Input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="w-full"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Format: JPG, PNG, GIF. Ukuran max: 2MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 <div>
@@ -292,6 +383,7 @@ export default function AdminPage() {
                     onClick={() => {
                       setIsEditing(false);
                       setCurrentProduct(null);
+                      setPreviewImage(null);
                     }}
                   >
                     Batal
