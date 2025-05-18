@@ -1,73 +1,78 @@
-# Welcome to your Lovable project
 
-## Project info
+# UMI Store E-Commerce Platform
 
-**URL**: https://lovable.dev/projects/eabdfd01-33e8-4059-a31f-93dc7d18b506
+UMI Store adalah aplikasi e-commerce yang memudahkan pelanggan untuk berbelanja online dengan pengalaman yang menyenangkan dan aman.
 
-## How can I edit this code?
+## Fitur Utama
 
-There are several ways of editing your application.
+- **Katalog Produk**: Browser produk berdasarkan kategori
+- **Keranjang Belanja**: Mengelola item belanja dengan mudah
+- **Sistem Autentikasi**: Login, register, dan login dengan media sosial
+- **Panel Admin**: Manajemen produk dan pesanan
+- **Responsive Design**: Kompatibel dengan berbagai ukuran layar
 
-**Use Lovable**
+## Teknologi yang Digunakan
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/eabdfd01-33e8-4059-a31f-93dc7d18b506) and start prompting.
+- **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
+- **State Management**: Zustand, TanStack Query
+- **Routing**: React Router
+- **Form Handling**: React Hook Form dengan validasi Zod
+- **UI Components**: Dibangun dengan shadcn/ui dan Radix UI
+- **Icons**: Menggunakan Lucide React
 
-Changes made via Lovable will be committed automatically to this repo.
+## Struktur Folder
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/     # Reusable UI components
+│   ├── auth/       # Authentication related components
+│   └── ui/         # UI components from shadcn
+├── contexts/       # React contexts
+├── hooks/          # Custom React hooks
+├── lib/            # Utilities, API helpers, types
+├── pages/          # Page components
+├── tests/          # Test files
+└── ...
 ```
 
-**Edit a file directly in GitHub**
+## Cara Menjalankan Aplikasi
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Clone repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Jalankan development server:
+   ```
+   npm run dev
+   ```
 
-**Use GitHub Codespaces**
+## Setup untuk Production
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Deployment Checklist
 
-## What technologies are used for this project?
+- [ ] Konfigurasi HTTPS
+- [ ] Implementasi backend dan database
+- [ ] Siapkan sistem pembayaran
+- [ ] Implementasi pengelolaan stok
+- [ ] Setup monitoring dan logging
+- [ ] Optimalisasi performa
 
-This project is built with:
+## Best Practices Pengembangan
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Keamanan**: Sanitasi semua input user, gunakan HTTPS, ikuti praktik keamanan terbaik
+- **Performa**: Optimalkan bundle size, lazy loading, dan meminimalkan re-render
+- **Aksesibilitas**: Ikuti standar WCAG untuk memastikan aplikasi dapat diakses oleh semua pengguna
+- **Testing**: Implementasi unit test untuk memastikan kualitas kode
 
-## How can I deploy this project?
+## Kontribusi
 
-Simply open [Lovable](https://lovable.dev/projects/eabdfd01-33e8-4059-a31f-93dc7d18b506) and click on Share -> Publish.
+1. Fork repository
+2. Buat branch fitur (`git checkout -b feature/nama-fitur`)
+3. Commit perubahan (`git commit -m 'Menambahkan fitur X'`)
+4. Push ke branch (`git push origin feature/nama-fitur`)
+5. Buat Pull Request
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+[MIT License](LICENSE)

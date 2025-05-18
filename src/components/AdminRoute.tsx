@@ -8,6 +8,10 @@ interface AdminRouteProps {
   children?: React.ReactNode;
 }
 
+/**
+ * Komponen untuk melindungi rute yang memerlukan akses admin
+ * Pengguna yang belum login atau bukan admin akan diarahkan ke halaman yang sesuai
+ */
 export default function AdminRoute({ children }: AdminRouteProps) {
   const { isLoggedIn, isAdmin, refreshUser } = useAuth();
   const location = useLocation();

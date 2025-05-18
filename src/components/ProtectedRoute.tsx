@@ -8,6 +8,10 @@ interface ProtectedRouteProps {
   children?: React.ReactNode;
 }
 
+/**
+ * Komponen untuk melindungi rute yang memerlukan autentikasi
+ * Pengguna yang belum login akan diarahkan ke halaman login
+ */
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isLoggedIn, refreshUser } = useAuth();
   const location = useLocation();
