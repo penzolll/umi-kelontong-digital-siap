@@ -234,6 +234,21 @@ const simulateDemoResponse = async (endpoint: string, options: RequestInit = {})
     };
   }
   
+  // Social login API handling
+  if (endpoint.startsWith('/api/auth/')) {
+    const provider = endpoint.split('/').pop();
+    
+    return {
+      token: `${provider}-demo-token`,
+      user: {
+        id: `${provider}-user-` + Math.floor(Math.random() * 1000),
+        name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
+        email: `user-${Math.floor(Math.random() * 1000)}@${provider}.com`,
+        role: "customer"
+      }
+    };
+  }
+  
   // Return categories
   if (endpoint === '/api/categories') {
     return { categories };
@@ -286,7 +301,7 @@ export const register = async (userData: { name: string, email: string, password
 
 /**
  * Social login API request
- * @param provider - Social provider (google, apple, etc.)
+ * @param provider - Social provider (google, whatsapp, etc.)
  */
 export const socialLogin = async (provider: string) => {
   return apiRequest(`/api/auth/${provider}`, {
