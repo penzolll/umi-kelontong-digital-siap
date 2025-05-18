@@ -11,14 +11,30 @@ import {
 } from "@/components/ui/card";
 import { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+import { ShoppingCart } from "lucide-react";
+import { useCartStore } from "@/lib/store";
+import { toast } from "sonner";
 
 interface RelatedProductsProps {
   products: Product[];
 }
 
 export default function RelatedProducts({ products }: RelatedProductsProps) {
+  const { addItem } = useCartStore();
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product, 1);
+    toast.success(`${product.name} ditambahkan ke keranjang`);
+  };
+
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   return (
-    <div>
+    <div className="mt-10">
       <h2 className="text-xl font-bold mb-4">Produk Terkait</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {products.map((product) => (
@@ -41,12 +57,21 @@ export default function RelatedProducts({ products }: RelatedProductsProps) {
                 {formatCurrency(product.discountPrice || product.price)}
               </CardDescription>
             </CardContent>
-            <CardFooter className="p-4 pt-0">
+            <CardFooter className="p-4 pt-0 flex flex-col gap-2">
               <Link to={`/product/${product.id}`} className="w-full">
                 <Button variant="outline" size="sm" className="w-full">
                   Lihat Detail
                 </Button>
               </Link>
+              <Button 
+                variant="default"
+                size="sm"
+                className="w-full"
+                onClick={(e) => handleAddToCart(e, product)}
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Tambah
+              </Button>
             </CardFooter>
           </Card>
         ))}

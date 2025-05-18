@@ -4,7 +4,7 @@
 User-agent: *
 Allow: /
 
-# Sitemap location (for future implementation)
+# Sitemap location
 Sitemap: https://umistore.com/sitemap.xml
 
 # Optimize for specific crawlers
@@ -22,7 +22,8 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-# Disallow certain admin paths
+# Disallow sensitive paths
 Disallow: /admin/
 Disallow: /checkout/
 Disallow: /api/
+Disallow: /order-confirmation
