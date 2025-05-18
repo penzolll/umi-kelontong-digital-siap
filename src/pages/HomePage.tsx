@@ -7,12 +7,25 @@ import { Button } from "@/components/ui/button";
 import { useHomePage } from "@/hooks/useHomePage";
 import { Category } from "@/lib/types";
 import { categories } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Halaman utama situs
  */
 export default function HomePage() {
-  const { featuredProducts, promoProducts } = useHomePage();
+  const { featuredProducts, promoProducts, isLoading } = useHomePage();
+
+  // Loading skeletons for products
+  const ProductSkeleton = () => (
+    <div className="rounded-lg border bg-card overflow-hidden">
+      <Skeleton className="aspect-square w-full" />
+      <div className="p-4">
+        <Skeleton className="h-4 w-3/4 mb-2" />
+        <Skeleton className="h-6 w-1/2 mb-4" />
+        <Skeleton className="h-8 w-full" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex-1">
@@ -42,14 +55,27 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {isLoading ? (
+            <>
+              <ProductSkeleton />
+              <ProductSkeleton />
+              <ProductSkeleton />
+              <ProductSkeleton />
+            </>
+          ) : featuredProducts.length > 0 ? (
+            featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <p className="col-span-full text-center py-8 text-muted-foreground">
+              Tidak ada produk unggulan saat ini.
+            </p>
+          )}
         </div>
       </section>
 
       {/* Promo Products */}
-      {promoProducts.length > 0 && (
+      {(isLoading || promoProducts.length > 0) && (
         <section aria-labelledby="promo-heading" className="container py-6">
           <div className="flex justify-between items-center mb-4">
             <h2 id="promo-heading" className="text-xl font-bold">Sedang Promo</h2>
@@ -58,9 +84,18 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {promoProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {isLoading ? (
+              <>
+                <ProductSkeleton />
+                <ProductSkeleton />
+                <ProductSkeleton />
+                <ProductSkeleton />
+              </>
+            ) : (
+              promoProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            )}
           </div>
         </section>
       )}

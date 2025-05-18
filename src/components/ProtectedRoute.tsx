@@ -1,7 +1,7 @@
 
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ProtectedRouteProps {
@@ -15,11 +15,27 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isLoggedIn, refreshUser } = useAuth();
   const location = useLocation();
+  const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
     // Refresh user data to ensure token hasn't expired
-    refreshUser();
+    const verifyAuth = async () => {
+      try {
+        refreshUser();
+        setIsVerifying(false);
+      } catch (error) {
+        console.error("Error verifying authentication:", error);
+        setIsVerifying(false);
+      }
+    };
+    
+    verifyAuth();
   }, [refreshUser]);
+
+  // Show loading while verifying auth
+  if (isVerifying) {
+    return <div className="flex items-center justify-center h-screen">Verifikasi...</div>;
+  }
 
   if (!isLoggedIn) {
     // Show toast notification

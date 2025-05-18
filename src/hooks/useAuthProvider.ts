@@ -2,15 +2,11 @@
 import { useState, useEffect } from "react";
 import { User } from "@/lib/types";
 import { toast } from "sonner";
+import { clearApiCache } from "@/lib/api";
 
-// Hardcoded admin account for demo purposes
-const ADMIN_ACCOUNT = {
-  email: "matdew444@outlook.com",
-  password: "123098",
-  id: "admin-1",
-  name: "Admin User",
-  role: "admin" as const
-};
+// Authentication storage keys
+const TOKEN_STORAGE_KEY = "auth-token";
+const USER_STORAGE_KEY = "user";
 
 /**
  * Custom hook untuk menyediakan fungsionalitas autentikasi
@@ -25,8 +21,8 @@ export function useAuthProvider() {
    * Memperbarui data user dari localStorage
    */
   const refreshUser = () => {
-    const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const userStr = localStorage.getItem(USER_STORAGE_KEY);
     
     if (token && userStr) {
       try {
@@ -36,8 +32,9 @@ export function useAuthProvider() {
         setIsAdmin(userData.role === "admin");
       } catch (error) {
         console.error("Error parsing user data:", error);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        // Clear invalid data
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        localStorage.removeItem(USER_STORAGE_KEY);
         toast.error("Sesi login habis, silakan login kembali");
       }
     }
@@ -49,23 +46,23 @@ export function useAuthProvider() {
    * @param {User} userData - Data user
    */
   const login = (token: string, userData: User) => {
-    // Check if this is the admin account (simplified for demo)
-    if (userData.email === ADMIN_ACCOUNT.email) {
-      userData = {
-        ...userData,
-        role: "admin",
-        id: ADMIN_ACCOUNT.id,
-        name: ADMIN_ACCOUNT.name
-      };
-    } else if (!userData.role) {
+    // Ensure role is set
+    if (!userData.role) {
       userData.role = "customer";
     }
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
+    // Store auth data
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    
+    // Update state
     setUser(userData);
     setIsLoggedIn(true);
     setIsAdmin(userData.role === "admin");
+    
+    // Clear API cache on login to ensure fresh data
+    clearApiCache();
+    
     toast.success(`Selamat datang, ${userData.name}`);
   };
 
@@ -73,12 +70,17 @@ export function useAuthProvider() {
    * Logout user dan menghapus data dari localStorage
    */
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_STORAGE_KEY);
     localStorage.removeItem("cart");
+    
     setUser(null);
     setIsLoggedIn(false);
     setIsAdmin(false);
+    
+    // Clear API cache on logout to ensure fresh data
+    clearApiCache();
+    
     toast.info("Anda telah keluar dari sistem");
   };
 

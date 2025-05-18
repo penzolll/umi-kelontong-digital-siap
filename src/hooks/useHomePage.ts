@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useProductStore } from "@/lib/store";
 import { Product } from "@/lib/types";
-import { products } from "@/lib/data"; 
+import { getProducts, clearApiCache } from "@/lib/api"; 
 
 /**
  * Custom hook untuk halaman beranda
@@ -15,27 +15,37 @@ export function useHomePage() {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Simulasi loading data
-    setIsLoading(true);
-    
-    try {
-      // Set initial products to the store
-      setProducts(products);
+    // Fetch data from API
+    const fetchProducts = async () => {
+      setIsLoading(true);
       
-      // Set featured and promo products
-      setFeaturedProducts(products.filter(product => product.isFeatured));
-      setPromoProducts(products.filter(product => product.isPromo));
-    } catch (error) {
-      console.error("Error loading product data:", error);
-    } finally {
-      setIsLoading(false);
-    }
+      try {
+        // Clear API cache to ensure fresh data
+        clearApiCache('/api/products');
+        
+        // Get all products from API
+        const response = await getProducts();
+        const productsData = response.products || [];
+        
+        // Set products to the store
+        setProducts(productsData);
+        
+        // Set featured and promo products
+        setFeaturedProducts(productsData.filter(product => product.isFeatured));
+        setPromoProducts(productsData.filter(product => product.isPromo));
+      } catch (error) {
+        console.error("Error loading product data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProducts();
   }, [setProducts]);
   
   return {
     featuredProducts,
     promoProducts,
-    isLoading,
-    categories: products
+    isLoading
   };
 }

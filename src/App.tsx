@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 // Protected Routes
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import AdminDashboard from "./components/admin/AdminDashboard";
 
 // Configure React Query client with better defaults
 const queryClient = new QueryClient({
@@ -46,36 +47,57 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/categories" element={<CategoriesPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                
-                {/* Protected Routes - Require login */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-                </Route>
-                
-                {/* Admin Routes - Require admin role */}
-                <Route element={<AdminRoute />}>
-                  <Route path="/admin" element={<AdminPage />} />
-                </Route>
-                
-                {/* 404 Page */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
+          <Routes>
+            {/* Admin Routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminDashboard />}>
+                <Route index element={<AdminPage />} />
+                {/* Add more admin routes here */}
+                <Route path="products" element={<AdminPage />} />
+                <Route path="orders" element={<AdminPage />} />
+                <Route path="customers" element={<AdminPage />} />
+                <Route path="reports" element={<AdminPage />} />
+                <Route path="settings" element={<AdminPage />} />
+              </Route>
+            </Route>
+
+            {/* Public Site Routes */}
+            <Route path="/" element={
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-1">
+                  <HomePage />
+                </main>
+                <Footer />
+              </div>
+            } />
+            
+            <Route path="/*" element={
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-1">
+                  <Routes>
+                    <Route path="products" element={<ProductsPage />} />
+                    <Route path="product/:id" element={<ProductDetailPage />} />
+                    <Route path="categories" element={<CategoriesPage />} />
+                    <Route path="about" element={<AboutPage />} />
+                    <Route path="auth" element={<AuthPage />} />
+                    
+                    {/* Protected Routes - Require login */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="cart" element={<CartPage />} />
+                      <Route path="checkout" element={<CheckoutPage />} />
+                      <Route path="order-confirmation" element={<OrderConfirmationPage />} />
+                    </Route>
+                    
+                    {/* 404 Page */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
+            } />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
